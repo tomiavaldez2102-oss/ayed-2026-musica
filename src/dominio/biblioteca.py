@@ -39,11 +39,11 @@ class Biblioteca:
         for d in directas:
             resultado.insertar_al_final(d)
 
-            for d in directas:
-                sub_versiones = self.versiones_de(d)
-                for sub in sub_versiones:
-                    resultado.insertar_al_final(sub)
-                    
+        for d in directas:
+            sub_versiones = self.versiones_de(d)
+            for sub in sub_versiones:
+                resultado.insertar_al_final(sub)
+
         return resultado
      
 

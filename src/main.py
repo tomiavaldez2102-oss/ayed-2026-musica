@@ -7,10 +7,9 @@ from src.tads.lista_enlazada import ListaEnlazada
 from src.excepciones import ColeccionLlenaError, PilaVaciaError, ColaVaciaError
 from src.dominio.biblioteca import Biblioteca
 from src.dominio.cancion import Cancion
+from src.algoritmos.busqueda import busqueda_lineal, busqueda_binaria
+from src.algoritmos.ordenamiento import ordenar_seleccion, ordenar_insercion
 
-#la funcion tiene un parametro biblio
-#este parametro va a ser una caja 
-#en la que guardare cosas
 
 class Playlist:
     def __init__(self, tope =3):
@@ -42,13 +41,15 @@ def main():
     cola_reproduccion = Cola()
 
     while True:
-        print('\n--- SPOTIFY UNaB ---')
+        print('\n--- SPOTIFY UNaB ---') 
         print('1. Listar catalogo (Iterador)')
         print('2. Buscar versiones derivadas (Recursion E2)')
         print('3. Agregar cancion a Playlist (Tope)')
         print('4. Escuchar cancion (Cola y Pila)')
         print('5. Deshacer ultima escuchada (Pila)')
-        print('6. Salir')
+        print('6. Buscar en Catalogo (Lineal/Binaria)') 
+        print('7. Ordenar Catalogo (Seleccion/Insercion)')
+        print('8. Salir')
         opcion = input('Elije una opcion: ').strip()
 
         if opcion =='1':
@@ -96,7 +97,45 @@ def main():
             except PilaVaciaError as e:
                 print(f'ERROR: {e}')
         elif opcion == '6':
-            break
+            print("\n--- BÚSQUEDA EN CATÁLOGO ---")
+            print("1. Búsqueda Lineal")
+            print("2. Búsqueda Binaria")
+            sub_op = input("Elige método de búsqueda: ").strip()
+            if sub_op == '1':
+                clave_buscada = input('Ingrese el titulo de la cancion a buscar: ')
+                print('Aviso: Asegurate de haber ordenado el catalogo previamente por titulo (Opcion 7).')
+                resultado = busqueda_lineal(mi_biblio.catalogo, clave_buscada, obtener_clave=lambda c: c.titulo)
+                if resultado:
+                    print(f"\n¡Encontrado!: {resultado.id}. {resultado.titulo} - {resultado.artista}")
+                else:
+                    print("\nCanción no encontrada (Lineal).")
+            elif sub_op =='2':
+                clave_buscada = input('Ingresa el titulo de la cancion a buscar: ')
+                print('Aviso: Asegurate de haber ordenado el catalogo previamente por titulo (Opcion 7).')
+                resultado = busqueda_binaria(mi_biblio.catalogo, clave_buscada, obtener_clave=lambda c: c.titulo)
+                if resultado:
+                    print(f"\n¡Encontrado!: {resultado.id}. {resultado.titulo} - {resultado.artista}")
+                else:
+                    print("\nNo encontrado o catálogo desordenado (Binaria).")
+            elif opcion == '7':
+                print("\n--- ORDENAR CATÁLOGO ---")
+                print("Criterio: 1) Por Título  2) Por ID")
+                crit_op = input("Elige criterio: ").strip()
+                if crit_op == '2':
+                    obtener_clave_func = lambda c: c.id
+                    criterio_nombre = 'ID'
+                else:
+                    obtener_clave_func = lambda c: c.titulo
+                    criterio_nombre = 'Titulo'
+                print("Algoritmo: 1) Selección  2) Inserción")
+                alg_op = input("Elige algoritmo: ").strip()
+                if alg_op == '2':
+                    ordenar_insercion(mi_biblio.catalogo, obtener_clave_func)
+                    print(f"\nCatálogo ordenado por {criterio_nombre} usando Inserción.")
+                else:
+                    ordenar_seleccion(mi_biblio.catalogo, obtener_clave_func)
+                    print(f"\nCatálogo ordenado por {criterio_nombre} usando Selección.")
+
 
 if __name__ == '__main__':
     main()
