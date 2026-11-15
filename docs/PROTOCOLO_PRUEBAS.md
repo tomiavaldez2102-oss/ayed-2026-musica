@@ -15,7 +15,14 @@
 - | P07 | Desencolar cola vacía | excepción propia, menú sigue | pasa |
 - | P08 | Listar colección con iterador | el orden coincide con las inserciones | pasa |
 
+## Protocolo de Pruebas - Entrega 4
 
+- | ID | Qué hacer en el CLI | Resultado esperado | Resultado |
+- | :--- | :--- | :--- | :--- |
+- | *P09* | Búsqueda lineal de un nombre que existe | Lo encuentra y lo muestra en pantalla[cite: 7]. | *Pasa*[cite: 7] |
+- | *P10* | Búsqueda lineal de un nombre que no existe | Muestra "No encontrado", sin traceback, y el menú continúa[cite: 7]. | *Pasa*[cite: 7] |
+- | *P11* | Búsqueda binaria con el catálogo desordenado | Avisa o reordena automáticamente; no da un falso "no encontrado"[cite: 7]. | *Pasa*[cite: 7] |
+- | *P12* | Ordenar por un criterio y después por otro | El orden del catálogo cambia correctamente según el criterio seleccionado[cite: 7]. | *Pasa*[cite: 7] |
 
 
 

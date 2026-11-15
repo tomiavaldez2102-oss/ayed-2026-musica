@@ -1,0 +1,3 @@
+id,titulo,artista,album,genero,anio,duracion_seg
+60,Agua,Fito paez,Cualquier cosa,pop,2000,180
+99,Boca,Chuwi,Sky,Techno,2009,180

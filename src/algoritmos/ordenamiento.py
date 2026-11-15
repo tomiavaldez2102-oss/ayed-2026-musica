@@ -1,18 +1,31 @@
+from src.tads.lista_enlazada import ListaEnlazada
+
 def ordenar_seleccion(coleccion, obtener_clave):
-    n = len(coleccion)
+    elementos = list(coleccion)
+    n = len(elementos)
     for i in range(n - 1):
         pos_min = i
         for j in range(i + 1, n):
-            if obtener_clave(coleccion[j]) < obtener_clave(coleccion[pos_min]):
+            if obtener_clave(elementos[j]) < obtener_clave(elementos[pos_min]):
                 pos_min = j
-        coleccion[i], coleccion[pos_min] = coleccion[pos_min], coleccion[i]
+        elementos[i], elementos[pos_min] = elementos[pos_min], elementos[i]
+    while not coleccion.esta_vacia():
+         coleccion.eliminar(coleccion._cabeza.dato)
+    for elem in elementos:
+         coleccion.insertar_al_final(elem)
     return coleccion
 def ordenar_insercion(coleccion, obtener_clave):
-    for i in range(1,len(coleccion)):
-        actual = coleccion[i]
+    elementos = list(coleccion)
+    for i in range(1,len(elementos)):
+        actual = elementos[i]
         j = i - 1
-        while j >= 0 and obtener_clave(coleccion[j]) > obtener_clave(actual):
-                coleccion[j+1] = coleccion[j]
+        while j >= 0 and obtener_clave(elementos[j]) > obtener_clave(actual):
+                elementos[j+1] = elementos[j]
                 j -=1
-        coleccion[j+1] = actual
+        elementos[j+1] = actual
+        
+    while not coleccion.esta_vacia():
+         coleccion.eliminar(coleccion._cabeza.dato)
+    for elem in elementos:
+         coleccion.insertar_al_final(elem)
     return coleccion

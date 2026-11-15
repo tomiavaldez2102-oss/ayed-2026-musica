@@ -15,7 +15,7 @@ class ListaEnlazada:
     def insertar_al_final(self, dato):
         nuevo = Nodo(dato)
         if self.esta_vacia():
-            self._cabeza = nuevo
+            self._cabeza = nuevo   
         else:
             actual = self._cabeza
             while actual.siguiente is not None:
@@ -50,3 +50,10 @@ class ListaEnlazada:
         while actual is not None:
             yield actual.dato
             actual = actual.siguiente
+    def eliminar_inicio(self):
+        if self.esta_vacia():
+            return None
+        dato = self._cabeza.dato
+        self._cabeza = self._cabeza.siguiente
+        self._tamanio -=1
+        return dato

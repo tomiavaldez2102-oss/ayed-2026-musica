@@ -1,12 +1,15 @@
 from src.excepciones import ColaVaciaError
+from src.tads.lista_enlazada import ListaEnlazada
 class Cola:
     def __init__(self):
-        self._items = []
+        self._items = ListaEnlazada()
     def encolar(self, item):
-        self._items.append(item)
+        self._items.insertar_al_final(item)
     def desencolar(self):
         if self.esta_vacia():
             raise ColaVaciaError('La cola de reproduccion esta vacia.')
-        return self._items.pop(0)
+        frente = self._items._cabeza.dato
+        self._items.eliminar(frente)
+        return frente
     def esta_vacia(self):
-        return len(self._items)==0
+        return self._items.esta_vacia()
