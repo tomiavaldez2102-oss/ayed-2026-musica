@@ -1,10 +1,24 @@
 # Informe Tecnico - Entrega 1
-
+Grupo : Valdez Tomas - Carola Maidana
+Tema : Musica
 ## 1. Justificacion del Tema
 Hemos seleccionado el tema de **Biblioteca musical** por que permite modelar de forma natural entidades del mundo real(como canciones y artistas) utilizando la Programacion Orientada a Objetos, preparandose para integrar estructuras de datos avanzadas en las siguientes etapas.
 ## 2. Conceptos Teoricos: Mutabilidad en Python
 - **Elementos mutables:** Sus valores pueden modificarse tras su creacion sin alterar su identidad en memoria(ej. listas, diccionarios).
 - **Elementos Inmutables:** Su contenido no puede alterarse una vez inicializados; cualquier cambio crea un objeto nuevo(ej. cadenas de texto, numeros, tuplas)
+## 2. Modelo (E1)
+
+La entidad central del dominio es la clase *Cancion* (src/dominio/cancion.py), que representa cada pista musical del catálogo con 7 atributos tipados:
+
+* *Identificador (id: int):* Inmutable una vez instanciado el objeto; actúa como clave única tanto en la búsqueda en memoria como para calcular su índice ordinal (0-based) en el archivo binario de registros fijos.
+* *Atributos descriptivos y mutables (titulo: str, artista: str):* Pueden modificarse en tiempo de ejecución desde la operación ABM (6b), actualizándose en simultáneo en RAM, en el registro correspondiente de data/canciones.bin mediante acceso directo (seek) y en data/canciones.txt.
+* *Metadatos adicionales (album: str, genero: str, anio: int, duracion_seg: int):* Completan la ficha técnica de cada canción y mantienen sus tipos y anchos fijos para la serialización binaria (<I 30s 25s 30s 12s 2H = 105 bytes).
+
+*Relación entre las estructuras del sistema:*
+* *Catálogo principal (ListaEnlazada):* Almacena la colección maestra de canciones cargadas desde disco (67 registros iniciales) y sirve como fuente única de verdad para listar, buscar, ordenar y persistir.
+* *Playlist (ListaEnlazada con tope = 3):* Subcolección acotada que referencia canciones existentes del catálogo; al intentar superar los 3 elementos lanza ColeccionLlenaError.
+* *Historial de reproducción (Pila LIFO):* Registra las canciones ya escuchadas para permitir volver a la última reproducida (desapilar()).
+* *Cola de reproducción (Cola FIFO):* Administra las próximas canciones pendientes en orden estricto de llegada (encolar() / desencolar()).
 
 ## Función: versiones_de(id_cancion)
 - **Caso base:** Si la canción no tiene versiones directas, devolver lista vacía [].
@@ -23,6 +37,17 @@ Devuelve: [99] + versiones_de(99)
 
 Devuelve: []
 - **Resultado Final:** [13] + [99] + [] = [13, 99]
+
+
+## 4. TADs (E3)
+
+| TAD | Operaciones implementadas | Invariante de representación | Dónde se usa en el sistema |
+| :--- | :--- | :--- | :--- |
+| *ListaEnlazada* (src/tads/lista_enlazada.py) | insertar_al_final(dato), eliminar(posicion), obtener(posicion), tamanio(), esta_vacia(), __iter__() | Los nodos están encadenados secuencialmente desde cabeza hasta None sin ciclos; el contador cantidad coincide siempre con la cantidad real de nodos enlazados; la playlist tiene además un tope máximo estricto (cantidad <= 3). | *Catálogo principal* de 67 canciones (carga desde .txt/.bin, listado con iterador, búsquedas, ordenamientos y ABM persistente) y *Playlist* con tope máximo de 3 canciones (opción 6d). |
+| *Pila* (src/tads/pila.py) | apilar(dato), desapilar(), ver_tope(), esta_vacia(), tamanio() | Política LIFO (Last-In, First-Out): el acceso, inserción y extracción ocurren únicamente por el tope; nunca hay huecos intermedios y si esta_vacia() es verdadero, desapilar() y ver_tope() lanzan PilaVaciaError. | *Historial de reproducción* (opción 7): registra las últimas canciones reproducidas para permitir volver a la canción anterior en orden inverso. |
+| *Cola* (src/tads/cola.py) | encolar(dato), desencolar(), ver_frente(), esta_vacia(), tamanio() | Política FIFO (First-In, First-Out): toda inserción se realiza por el final (fondo) y toda extracción por el principio (frente), preservando el orden estricto de llegada; si está vacía, desencolar() lanza ColaVaciaError. | *Cola de reproducción* (opción 8): gestiona las próximas canciones pendientes por reproducirse en orden de encolado. |
+
+
 
 ## §5. Análisis de Complejidad y Mediciones Empíricas
 
@@ -52,3 +77,22 @@ Se realizaron pruebas de rendimiento comparando el dataset original de la cáted
 
 Conclusión de las mediciones: Se comprueba empíricamente que la búsqueda binaria escala de manera logarítmica casi imperceptible, mientras que la búsqueda lineal y los algoritmos de ordenamiento muestran el crecimiento lineal y cuadrático esperados teóricamente[cite: 7, 17].
 
+## 6. Persistencia (E5)
+
+* **Texto simple (`.txt`):** Implementado en `src/persistencia/texto.py` mediante `cargar_texto` y `guardar_texto`. Lee secuencialmente el archivo CSV con encabezado (`id,titulo,artista,album,genero,anio,duracion_seg`), valida que cada fila tenga exactamente 7 campos y reconstruye los objetos `Cancion` en una `ListaEnlazada`.
+* **Layout del registro binario:** `struct.Struct('<I 30s 25s 30s 12s 2H')` = **105 bytes** por registro:
+  * `id` (`I`, 4 bytes)
+  * `titulo` (`30s`, 30 bytes)
+  * `artista` (`25s`, 25 bytes)
+  * `album` (`30s`, 30 bytes)
+  * `genero` (`12s`, 12 bytes)
+  * `anio` (`H`, 2 bytes) y `duracion_seg` (`H`, 2 bytes)
+  * Las cadenas se codifican en UTF-8 recortando al ancho máximo y rellenando con bytes nulos (`\x00`).
+* **Header:** `struct.Struct('<4s 1s I')` = **9 bytes**: magia `b'AYED'` (4 B), tema `b'M'` (1 B) y cantidad total $N$ de registros (4 B).
+* **Actualización por posición (`O(1)`):** `actualizar_registro` abre el archivo en modo `'r+b'`, calcula `HEADER.size + (posicion * FORMATO.size)` (`9 + posicion * 105`), salta con `seek` y sobrescribe únicamente ese registro sin reescribir el resto del archivo. El alta (`alta_binario`) realiza un *append* al final (`seek(0, 2)`) y actualiza el contador del header (`seek(0)`). La baja (`baja_binario`) compacta el archivo reescribiéndolo sin el registro eliminado.
+
+
+## 7. Reparto de trabajo (E6)
+
+| Integrante | Usuario GitHub | Tareas realizadas (E1–E6) | Archivos que defiende en el examen oral |
+| *Tomás Agustín Valdez* * Maidana Carola *| tomiavaldez2102-oss | Modelado de dominio (Cancion) y excepciones propias (E1); recursión de versiones derivadas sobre versiones.txt (E2); TADs ListaEnlazada con iterador, Pila y Cola (E3); búsqueda lineal/binaria y ordenamientos por selección e inserción (E4); persistencia en .txt y .bin de longitud fija con struct y acceso directo $\mathcal{O}(1)$ con seek (E5); integración del CLI de 10 opciones y protocolo de regresión P01–P15 (E6). | src/main.py, src/persistencia/binario.py, src/persistencia/texto.py, src/tads/lista_enlazada.py, src/tads/pila.py, src/tads/cola.py |

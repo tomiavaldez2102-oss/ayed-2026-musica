@@ -24,8 +24,26 @@
 - | *P11* | Búsqueda binaria con el catálogo desordenado | Avisa o reordena automáticamente; no da un falso "no encontrado"[cite: 7]. | *Pasa*[cite: 7] |
 - | *P12* | Ordenar por un criterio y después por otro | El orden del catálogo cambia correctamente según el criterio seleccionado[cite: 7]. | *Pasa*[cite: 7] |
 
+## Protocolo de Pruebas - Entrega 5
+
+| P13 | E5 | Guardar catálogo en .txt (opción 9b), salir (0) y volver a entrar | Los cambios persisten al reiniciar el programa | Pasa |
+| P14 | E5 | Guardar .bin (9c), modificar canción por ID (6b) y recargar .bin (9d) | actualizar_registro modifica en O(1) con seek y el cambio se refleja al recargar | Pasa |
+| P15 | E5 | Cargar archivo binario inválido/basura en opción 9d | Lanza ArchivoInvalidoError con mensaje claro sin traceback y vuelve al menú | Pasa |
 
 
 
-
-
+- **P01** E1 Arrancar y listar catálogo (dataset de la cátedra) - **pasa**
+- **P02** E1 Ítem inexistente → mensaje claro, menú sigue - **pasa**
+- **P03** E2 Recursión sobre un ítem con cadena  - **pasa**
+- **P04** E2 Recursión sobre un ítem sin derivados (caso base) - **pasa**
+- **P05** E3 Llenar la colección principal hasta el tope - **pasa**
+- **P06** E3 Desapilar pila vacía → excepción propia - **pasa**
+- **P07** E3 Desencolar cola vacía → excepción propia - **pasa**
+- **P08** E3 Listar con el iterador, orden = inserciones - **pasa**
+- **P09** E4 Búsqueda lineal de algo que existe - **pasa**
+- **P10** E4 Búsqueda lineal de algo que no existe - **pasa**
+- **P11** E4 Binaria con catálogo desordenado → avisa/reordena - **pasa**
+- **P12** E4 Ordenar por un criterio y después por otro - **pasa**
+- **P13** E5 Guardar .txt , salir, volver a entrar → sigue todo - **pasa**
+- **P14** E5 Guardar binario, modificar por id, recargar → cambió - **pasa**
+- **P15** E5 Archivo basura → ArchivoInvalidoError sin tracebacK - **pasa**
